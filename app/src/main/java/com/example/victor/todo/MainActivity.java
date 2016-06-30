@@ -1,5 +1,6 @@
 package com.example.victor.todo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -9,7 +10,11 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.firebase.client.Firebase;
+
 public class MainActivity extends AppCompatActivity {
+
+    private Firebase mRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,6 +22,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+
+        // Check Authentication
+        //Here you create a Firebase reference pointing
+        //to you app’s url, and then call getAuth() to check if the user is authenticated.
+        mRef = new Firebase(Constants.FIREBASE_URL);
+        if (mRef.getAuth() == null) {
+            loadLoginView();
+        }
 
 
     }
@@ -41,5 +55,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    //Create the method to load login activity here
+    //This navigates to the Login view and clears the activity stack.
+    //This prevents the user going back to the main activity when they press the Back button from the login view.
+    private void loadLoginView() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 }
