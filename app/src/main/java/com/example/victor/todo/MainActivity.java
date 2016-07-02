@@ -1,5 +1,6 @@
 package com.example.victor.todo;
 
+import android.content.ClipData;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -23,11 +24,13 @@ import com.firebase.client.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Firebase mRef;
+    private Firebase mRef,  mTry;
 
     //Variables to for userId and the items url
     private String mUserId;
     private String itemsUrl;
+    private String myListUrl;
+    private String myTryUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         //Here you create a Firebase reference pointing
         //to you app’s url, and then call getAuth() to check if the user is authenticated.
         mRef = new Firebase(Constants.FIREBASE_URL);
+        mTry = new Firebase(Constants.TRY_URL);
         if (mRef.getAuth() == null) {
             loadLoginView();
         }
@@ -53,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         itemsUrl = Constants.FIREBASE_URL + "/users/" + mUserId + "/items";
+        myListUrl = Constants.FIREBASE_URL + "/myList";
+        myTryUrl = Constants.TRY_URL;
 
         // Set up ListView
         final ListView listView = (ListView) findViewById(R.id.listView);
@@ -68,6 +74,10 @@ public class MainActivity extends AppCompatActivity {
                         .push()
                         .child("title")
                         .setValue(text.getText().toString());
+//                new Firebase(myListUrl)
+//                        .push().child("title").setValue(text.getText().toString());
+                new Firebase(myTryUrl).setValue(text.getText().toString());
+                //myTryUrl.setValue(text.getText().toString()); //Write to the trything
             }
         });
 
@@ -143,6 +153,13 @@ public class MainActivity extends AppCompatActivity {
             mRef.unauth();
             loadLoginView();
         }
+        else if (id == R.id.action_cards) {
+
+            //Let this take you to your card view activity
+            //mRef.unauth();
+            mRef.getAuth();
+            cardsView();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -152,6 +169,12 @@ public class MainActivity extends AppCompatActivity {
     //This prevents the user going back to the main activity when they press the Back button from the login view.
     private void loadLoginView() {
         Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+    private void cardsView() {
+        Intent intent = new Intent(this, CardViewActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

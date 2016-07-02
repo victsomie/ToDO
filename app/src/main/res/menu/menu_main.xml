@@ -4,6 +4,16 @@
     tools:context="com.example.victor.todo.MainActivity">
 
     <item
+        android:id="@+id/user_name"
+        android:orderInCategory="100"
+        android:title="@string/user_name"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_cards"
+        android:orderInCategory="100"
+        android:title="@string/user_emails"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_logout"
         android:orderInCategory="100"
         android:title="@string/action_logout"
