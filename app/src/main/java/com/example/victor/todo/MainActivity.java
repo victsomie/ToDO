@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -24,10 +25,11 @@ import com.firebase.client.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Firebase mRef,  mTry;
+    private Firebase mRef,  mTry, mEmail;
 
     //Variables to for userId and the items url
     private String mUserId;
+    private String mEmailUrl;
     private String itemsUrl;
     private String myListUrl;
     private String myTryUrl;
@@ -45,9 +47,12 @@ public class MainActivity extends AppCompatActivity {
         //to you app’s url, and then call getAuth() to check if the user is authenticated.
         mRef = new Firebase(Constants.FIREBASE_URL);
         mTry = new Firebase(Constants.TRY_URL);
+        mEmail = new Firebase(Constants.EMAIL_URL);
+
         if (mRef.getAuth() == null) {
             loadLoginView();
         }
+
 
         //=======Add code to add items into firebase and return the items to be displays in the listview
         try {
@@ -59,8 +64,28 @@ public class MainActivity extends AppCompatActivity {
         itemsUrl = Constants.FIREBASE_URL + "/users/" + mUserId + "/items";
         myListUrl = Constants.FIREBASE_URL + "/myList";
         myTryUrl = Constants.TRY_URL;
+        mEmailUrl = Constants.TRY_URL + "/users/" + mUserId + "/email";
+
+
+        //set the username
+        final TextView textView= (TextView) findViewById(R.id.user_name_final);
+
+
+        mEmail.child(mUserId).child("email").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String h = dataSnapshot.getValue().toString();
+                textView.setText("Welcome back " + h);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
 
         // Set up ListView
+
         final ListView listView = (ListView) findViewById(R.id.listView);
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
         listView.setAdapter(adapter);

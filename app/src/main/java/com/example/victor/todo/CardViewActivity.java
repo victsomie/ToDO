@@ -24,6 +24,7 @@ public class CardViewActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager mLayoutManager;
     private static String LOG_TAG = "CardViewActivity";
 
+
     //Access firebase
     private Firebase mRef, mTry;
 
@@ -38,17 +39,16 @@ public class CardViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_view);
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
+        mTry = new Firebase(Constants.TRY_URL);
 
 
 
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
 
         mRef = new Firebase(Constants.FIREBASE_URL);
-        mTry = new Firebase(Constants.TRY_URL);
+
 
         //=======Add code to add items into firebase and return the items to be displays in the listview
         try {
@@ -67,10 +67,9 @@ public class CardViewActivity extends AppCompatActivity {
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        //mAdapter = new MyRecyclerViewAdapter(getDataSet());
+        //mAdapt er = new MyRecyclerViewAdapter(getDataSet());
         mAdapter = new MyRecyclerViewAdapter(getDataSet());
         mRecyclerView.setAdapter(mAdapter);
-
 
 
         mTry.addValueEventListener(new ValueEventListener() {
@@ -79,6 +78,8 @@ public class CardViewActivity extends AppCompatActivity {
                 //System.out.println(snapshot.getValue());  //prints "Do you have data? You'll love Firebase."
                 // System.out.println(snapshot.getValue());  //prints "Do you have data? You'll love Firebase."
                 xx =  snapshot.getValue().toString(); //gets the specific data when it is changed
+                //xx =  snapshot.getValue().toString(); //gets the specific data when it is changed
+
             }
             @Override public void onCancelled(FirebaseError error) { }
         });
@@ -117,9 +118,6 @@ public class CardViewActivity extends AppCompatActivity {
 */
         // ===========Use Firebase to populate the list.
 
-
-
-
     }
 
     @Override
@@ -157,15 +155,6 @@ public class CardViewActivity extends AppCompatActivity {
 
         return results;
     }
-
-
-
-
-
-
-
-
-
 
 
     //Rebouncing to login

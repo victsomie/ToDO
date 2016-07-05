@@ -12,6 +12,12 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main"
     android:orientation="vertical">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/user_name_final"
+        android:text="@string/user_name"
+        />
 
     <ListView
         android:id="@+id/listView"
