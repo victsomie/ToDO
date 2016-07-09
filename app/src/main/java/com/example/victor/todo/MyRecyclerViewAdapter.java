@@ -20,8 +20,9 @@ public class MyRecyclerViewAdapter extends RecyclerView
     private static MyClickListener myClickListener;
 
     public static class DataObjectHolder extends RecyclerView.ViewHolder
-            implements View
-            .OnClickListener {
+            //implements View
+            //.OnClickListener
+    {
         TextView label;
         TextView dateTime;
 
@@ -30,13 +31,13 @@ public class MyRecyclerViewAdapter extends RecyclerView
             label = (TextView) itemView.findViewById(R.id.textView);
             dateTime = (TextView) itemView.findViewById(R.id.textView2);
             Log.i(LOG_TAG, "Adding Listener");
-            itemView.setOnClickListener(this);
+           // itemView.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View v) {
-            myClickListener.onItemClick(getAdapterPosition(), v);
-        }
+//        @Override
+//        public void onClick(View v) {
+//            myClickListener.onItemClick(getAdapterPosition(), v);
+//        }
     }
 
     public void setOnItemClickListener(MyClickListener myClickListener) {

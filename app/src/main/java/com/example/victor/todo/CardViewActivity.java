@@ -50,6 +50,10 @@ public class CardViewActivity extends AppCompatActivity {
         mRef = new Firebase(Constants.FIREBASE_URL);
 
 
+
+        if (mRef.getAuth() == null) {
+            loadLoginView();
+        }
         //=======Add code to add items into firebase and return the items to be displays in the listview
         try {
             mUserId = mRef.getAuth().getUid();
