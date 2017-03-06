@@ -8,6 +8,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -24,13 +26,17 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
 
+    final String TAG = "MAinActivity";
+
     private Firebase mRef, mTry, mEmail;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
+
     private FirebaseAuth mAuth;
 
     //Variables to for userId and the items url
@@ -187,13 +193,45 @@ public class MainActivity extends AppCompatActivity {
         // Delete items when clicked
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String whatToDelete = listView.getItemAtPosition(position).toString();
+                final String whatToDelete = listView.getItemAtPosition(position).toString();
 
-                DatabaseReference deletingReference = database.getReference();
+                DatabaseReference deletingReference = database.getReference().child("users").child(mUserId).child("items");
+
+                deletingReference.addValueEventListener(new com.google.firebase.database.ValueEventListener() {
+                    @Override
+                    public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
+                        long noOfChildren = dataSnapshot.getChildrenCount();
+                        // Toast.makeText(MainActivity.this, noOfChildren+"", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, noOfChildren+" CHILDREN FOUND");
+
+
+                        for(com.google.firebase.database.DataSnapshot snap : dataSnapshot.getChildren()){
+                            // snap gives you key values under the list of items recorded
+                            // dataSnapshot.getChilren() helps loop the number of children under items
+                            String onlyTheToDoList  = snap.child("title").getValue().toString();
+
+
+                            if(onlyTheToDoList.equals(whatToDelete)){
+                                Log.e(TAG, ">>>>> Snap value == >>>" + snap.getValue());
+                                Log.e(TAG, ">>>> Specific item == >>>>" + onlyTheToDoList);
+
+                                Log.e(TAG, " ++++++++++++++++++=+++++ ");
+                                Log.e(TAG, "We found your item ------ "+ onlyTheToDoList);
+                                snap.child("title").getRef().removeValue();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
 
                 //// =================== TRY DELETING ITEMS HERE ===================
                 //// ============******************************************======
                 //// =================== TRY DELETING ITEMS HERE ===================
+                /**
                 new Firebase(itemsUrl)
                         .orderByChild("title")
                         .equalTo((String) listView.getItemAtPosition(position))
@@ -208,6 +246,10 @@ public class MainActivity extends AppCompatActivity {
                             public void onCancelled(FirebaseError firebaseError) {
                             }
                         });
+
+                **/
+                Toast.makeText(MainActivity.this, listView.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
+
             }
         });
 
