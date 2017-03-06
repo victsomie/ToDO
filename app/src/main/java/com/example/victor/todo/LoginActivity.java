@@ -1,6 +1,7 @@
 package com.example.victor.todo;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +13,11 @@ import android.widget.TextView;
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +29,9 @@ public class LoginActivity extends AppCompatActivity {
     protected EditText passwordEditText;
     protected Button loginButton;
     protected TextView signUpTextView;
+
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +72,33 @@ public class LoginActivity extends AppCompatActivity {
                 } else {
                     final String emailAddress = email;
 
+
+                    // ========================== Signing in ========================================
+                    mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(task.isSuccessful()){
+                                String userId = mAuth.getCurrentUser().getUid();
+                                Map<String, Object> map = new HashMap<String, Object>();
+                                map.put("email", emailAddress);
+
+                                ref.child("users").child(userId).updateChildren(map); //This adds(updates) items increamentally
+
+                                //Once the user signups up correctly redirect them to the main activity
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+
+                                finish();
+                            }
+
+                        }
+                    });
+
+
+                    // ========================== End of signing in ======================================
+
                     //Login with an email/password combination
                     ref.authWithPassword(email, password, new Firebase.AuthResultHandler() {
                         @Override
@@ -72,6 +108,9 @@ public class LoginActivity extends AppCompatActivity {
                             Map<String, Object> map = new HashMap<String, Object>();
                             map.put("email", emailAddress);
                             //ref.child("users").child(authData.getUid()).setValue(map); //This would update all elements at that point
+
+                            // ==== The original line is the first one below ====
+                            // ref.child("users").child(authData.getUid()).updateChildren(map); //This adds(updates) items increamentally
                             ref.child("users").child(authData.getUid()).updateChildren(map); //This adds(updates) items increamentally
 
                             //Once the user signups up correctly redirect them to the main activity
