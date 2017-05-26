@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -26,9 +27,12 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private Firebase mRef, mTry, mEmail;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    //private FirebaseAuth.AuthStateListener mAuthListener;
 
     //Variables to for userId and the items url
     private String mUserId;
@@ -51,26 +56,49 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAuth = FirebaseAuth.getInstance();
-
-        if (mAuth == null){
-            loadLoginView();
-        }
-        mUserId = mAuth.getCurrentUser().getUid();
-
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        //set the username
-        textView = (TextView) findViewById(R.id.user_name_final);
 
 
         // Check Authentication
         //Here you create a Firebase reference pointing
         //to you app’s url, and then call getAuth() to check if the user is authenticated.
+
+        //mTry = new Firebase(Constants.TRY_URL);
+        //authListen();
+
+//        if (mAuth.getCurrentUser() == null){
+//            loadLoginView();
+//
+//        }
+//
+//        if (mRef.getAuth() == null) {
+//            loadLoginView();
+//        }
+
+
+
+
+
+
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         mRef = new Firebase(Constants.FIREBASE_URL);
-        mTry = new Firebase(Constants.TRY_URL);
+        //set the username
+
+
+
+        try {
+            mUserId = mRef.getAuth().getUid();
+            Log.e(TAG, "========= GOT UserId Here=================");
+
+        } catch (Exception e) {
+
+            Log.e(TAG, e.getMessage());
+            Log.e(TAG, "========= NO USER ID=================");
+            loadLoginView();
+
+        }
 
 
         /**
@@ -89,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
          }
 
          **/
+
+        textView = (TextView) findViewById(R.id.user_name_final);
 
         itemsUrl = Constants.FIREBASE_URL + "/users/" + mUserId + "/items";
         myListUrl = Constants.FIREBASE_URL + "/myList";
@@ -273,7 +303,8 @@ public class MainActivity extends AppCompatActivity {
 
         //The logout button will redirect the user to the login activity
         if (id == R.id.action_logout) {
-            mRef.unauth();
+            // mRef.unauth();
+            mAuth.signOut();
             loadLoginView();
         } else if (id == R.id.action_cards) {
 
@@ -302,4 +333,47 @@ public class MainActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
+
+
+    public void authListen(){
+
+        Log.e(TAG, "authListen method");
+        // ...
+        /*
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    mUserId = user.getUid();
+                    Log.e(TAG, "========= GOT UserId Here too =================>> " +mUserId );
+                } else {
+                    // User is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                    loadLoginView();
+                }
+                // ...
+            }
+        };
+        */
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        //mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+       /*
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+        */
+    }
+
 }
