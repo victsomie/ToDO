@@ -47,8 +47,10 @@ public class MainActivity extends AppCompatActivity {
         //Here you create a Firebase reference pointing
         //to you app’s url, and then call getAuth() to check if the user is authenticated.
         mRef = new Firebase(Constants.FIREBASE_URL);
+
         mTry = new Firebase(Constants.TRY_URL);
         mEmail = new Firebase(Constants.EMAIL_URL);
+        mEmail.keepSynced(true);
 
         if (mRef.getAuth() == null) {
             loadLoginView();

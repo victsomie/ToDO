@@ -40,6 +40,7 @@ public class CardViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_card_view);
 
         mTry = new Firebase(Constants.TRY_URL);
+        mTry.keepSynced(true);
 
 
 
@@ -48,6 +49,7 @@ public class CardViewActivity extends AppCompatActivity {
 //        super.onStart();
 
         mRef = new Firebase(Constants.FIREBASE_URL);
+        mRef.keepSynced(true);
 
 
 
