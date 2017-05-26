@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "212286959992",
+    "firebase_url": "https://victortodo.firebaseio.com",
+    "project_id": "firebase-victortodo",
+    "storage_bucket": "firebase-victortodo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212286959992:android:a603943ef82b9d3b",
+        "android_client_info": {
+          "package_name": "com.example.victor.todo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "212286959992-v9l9nugj885vvadu1eajo91q7tpspo7m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6yHWs1hj87iBp_bD3obJFiiOA8bPe1_k"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

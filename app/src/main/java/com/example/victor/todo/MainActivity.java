@@ -4,10 +4,12 @@ import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,16 +19,30 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+
 
 public class MainActivity extends AppCompatActivity {
 
-    private Firebase mRef,  mTry, mEmail;
+    final String TAG = "MAinActivity";
+
+    private Firebase mRef, mTry, mEmail;
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    //private FirebaseAuth.AuthStateListener mAuthListener;
 
     //Variables to for userId and the items url
     private String mUserId;
@@ -35,47 +51,118 @@ public class MainActivity extends AppCompatActivity {
     private String myListUrl;
     private String myTryUrl;
 
+    TextView textView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
 
         // Check Authentication
         //Here you create a Firebase reference pointing
         //to you app’s url, and then call getAuth() to check if the user is authenticated.
+
+        //mTry = new Firebase(Constants.TRY_URL);
+        //authListen();
+
+//        if (mAuth.getCurrentUser() == null){
+//            loadLoginView();
+//
+//        }
+//
+//        if (mRef.getAuth() == null) {
+//            loadLoginView();
+//        }
+
+
+
+
+
+
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         mRef = new Firebase(Constants.FIREBASE_URL);
+<<<<<<< HEAD
 
         mTry = new Firebase(Constants.TRY_URL);
         mEmail = new Firebase(Constants.EMAIL_URL);
         mEmail.keepSynced(true);
+=======
+        //set the username
+>>>>>>> 50a0d42e644c3bf1fa8a76c7ae75a8ce2dce70f6
 
-        if (mRef.getAuth() == null) {
-            loadLoginView();
-        }
 
 
-        //=======Add code to add items into firebase and return the items to be displays in the listview
         try {
             mUserId = mRef.getAuth().getUid();
+            Log.e(TAG, "========= GOT UserId Here=================");
+
         } catch (Exception e) {
+
+            Log.e(TAG, e.getMessage());
+            Log.e(TAG, "========= NO USER ID=================");
             loadLoginView();
+
         }
+
+
+        /**
+         if (mRef.getAuth() == null) {
+         loadLoginView();
+         } else {
+         mUserId = mRef.getAuth().getUid();
+
+
+         //=======Add code to add items into firebase and return the items to be displays in the listview
+         try {
+         mUserId = mRef.getAuth().getUid();
+         } catch (Exception e) {
+         loadLoginView();
+         }
+         }
+
+         **/
+
+        textView = (TextView) findViewById(R.id.user_name_final);
 
         itemsUrl = Constants.FIREBASE_URL + "/users/" + mUserId + "/items";
         myListUrl = Constants.FIREBASE_URL + "/myList";
         myTryUrl = Constants.TRY_URL;
         mEmailUrl = Constants.TRY_URL + "/users/" + mUserId + "/email";
 
+        /*
 
-        //set the username
-        final TextView textView= (TextView) findViewById(R.id.user_name_final);
+        if (mAuth.getCurrentUser() == null) {
+            loadLoginView();
+        } else {
+            mUserId = mAuth.getCurrentUser().getUid();
 
 
-        mEmail.child(mUserId).child("email").addValueEventListener(new ValueEventListener() {
-            @SuppressLint("SetTextI18n")
+            // mEmail = new Firebase(Constants.EMAIL_URL);
+            //mEmail = mRef.child(Constants.EMAIL_URL);
+
+
+            // mEmail.child(mUserId).child("email").addValueEventListener(new ValueEventListener() {
+            mRef.child("users").child(mUserId).child("email").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String h = dataSnapshot.getValue().toString();
+                    textView.setText("Welcome back " + h);
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+
+        }
+        */
+
+        // mEmail.child(mUserId).child("email").addValueEventListener(new ValueEventListener() {
+        mRef.child("users").child(mUserId).child("email").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String h = dataSnapshot.getValue().toString();
@@ -143,6 +230,45 @@ public class MainActivity extends AppCompatActivity {
         // Delete items when clicked
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final String whatToDelete = listView.getItemAtPosition(position).toString();
+
+                DatabaseReference deletingReference = database.getReference().child("users").child(mUserId).child("items");
+
+                deletingReference.addValueEventListener(new com.google.firebase.database.ValueEventListener() {
+                    @Override
+                    public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
+                        long noOfChildren = dataSnapshot.getChildrenCount();
+                        // Toast.makeText(MainActivity.this, noOfChildren+"", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, noOfChildren+" CHILDREN FOUND");
+
+
+                        for(com.google.firebase.database.DataSnapshot snap : dataSnapshot.getChildren()){
+                            // snap gives you key values under the list of items recorded
+                            // dataSnapshot.getChilren() helps loop the number of children under items
+                            String onlyTheToDoList  = snap.child("title").getValue().toString();
+
+
+                            if(onlyTheToDoList.equals(whatToDelete)){
+                                Log.e(TAG, ">>>>> Snap value == >>>" + snap.getValue());
+                                Log.e(TAG, ">>>> Specific item == >>>>" + onlyTheToDoList);
+
+                                Log.e(TAG, " ++++++++++++++++++=+++++ ");
+                                Log.e(TAG, "We found your item ------ "+ onlyTheToDoList);
+                                snap.child("title").getRef().removeValue();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+                //// =================== TRY DELETING ITEMS HERE ===================
+                //// ============******************************************======
+                //// =================== TRY DELETING ITEMS HERE ===================
+                /**
                 new Firebase(itemsUrl)
                         .orderByChild("title")
                         .equalTo((String) listView.getItemAtPosition(position))
@@ -157,6 +283,10 @@ public class MainActivity extends AppCompatActivity {
                             public void onCancelled(FirebaseError firebaseError) {
                             }
                         });
+
+                **/
+                Toast.makeText(MainActivity.this, listView.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
+
             }
         });
 
@@ -180,10 +310,10 @@ public class MainActivity extends AppCompatActivity {
 
         //The logout button will redirect the user to the login activity
         if (id == R.id.action_logout) {
-            mRef.unauth();
+            // mRef.unauth();
+            mAuth.signOut();
             loadLoginView();
-        }
-        else if (id == R.id.action_cards) {
+        } else if (id == R.id.action_cards) {
 
             //Let this take you to your card view activity
             //mRef.unauth();
@@ -203,10 +333,54 @@ public class MainActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
+
     private void cardsView() {
         Intent intent = new Intent(this, CardViewActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
+
+
+    public void authListen(){
+
+        Log.e(TAG, "authListen method");
+        // ...
+        /*
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    mUserId = user.getUid();
+                    Log.e(TAG, "========= GOT UserId Here too =================>> " +mUserId );
+                } else {
+                    // User is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                    loadLoginView();
+                }
+                // ...
+            }
+        };
+        */
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        //mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+       /*
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+        */
+    }
+
 }

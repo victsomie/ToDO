@@ -7,12 +7,17 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
@@ -24,9 +29,15 @@ public class CardViewActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager mLayoutManager;
     private static String LOG_TAG = "CardViewActivity";
 
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference databaseReference = database.getReference();
+    DatabaseReference mRefEmailOnly ;
+
+    private FirebaseAuth mAuth;
 
     //Access firebase
     private Firebase mRef, mTry;
+
 
     private String mUserId;
     private  String itemsUrl;
@@ -37,10 +48,25 @@ public class CardViewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mAuth = FirebaseAuth.getInstance();
+        if (mAuth.getCurrentUser() == null){
+            loadLoginView();
+        } else {
+
+            mUserId = mAuth.getCurrentUser().getUid();
+        }
+
         setContentView(R.layout.activity_card_view);
 
         mTry = new Firebase(Constants.TRY_URL);
+<<<<<<< HEAD
         mTry.keepSynced(true);
+=======
+        // mRefEmailOnly = new Firebase(Constants.EMAIL_URL).child(mUserId).child("email");
+
+
+>>>>>>> 50a0d42e644c3bf1fa8a76c7ae75a8ce2dce70f6
 
 
 
@@ -53,20 +79,43 @@ public class CardViewActivity extends AppCompatActivity {
 
 
 
+        /*
         if (mRef.getAuth() == null) {
             loadLoginView();
         }
         //=======Add code to add items into firebase and return the items to be displays in the listview
         try {
             mUserId = mRef.getAuth().getUid();
+
         } catch (Exception e) {
 
         }
+
+        */
+        mRefEmailOnly = databaseReference.child("users").child(mUserId).child("email");
 
 
         //emailUrl= Constants.FIREBASE_URL + "/users/" + mUserId + "/email";
         myEmailList = Constants.FIREBASE_URL + "/myList";
         itemsUrl = Constants.FIREBASE_URL + "/users/" + mUserId + "/items";
+
+
+        mRefEmailOnly.addValueEventListener(new com.google.firebase.database.ValueEventListener() {
+            @Override
+            public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
+                xx = dataSnapshot.getValue().toString();
+                Toast.makeText(CardViewActivity.this,  "REAL DATA ==>>"+xx , Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+
 
         //Initializes references here
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -74,8 +123,11 @@ public class CardViewActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         //mAdapt er = new MyRecyclerViewAdapter(getDataSet());
+        // mAdapter = new MyRecyclerViewAdapter(getDataSet());
         mAdapter = new MyRecyclerViewAdapter(getDataSet());
         mRecyclerView.setAdapter(mAdapter);
+
+
 
 
         mTry.addValueEventListener(new ValueEventListener() {
@@ -83,7 +135,7 @@ public class CardViewActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot snapshot) {
                 //System.out.println(snapshot.getValue());  //prints "Do you have data? You'll love Firebase."
                 // System.out.println(snapshot.getValue());  //prints "Do you have data? You'll love Firebase."
-                xx =  snapshot.getValue().toString(); //gets the specific data when it is changed
+                //xx =  snapshot.getValue().toString(); //gets the specific data when it is changed
                 //xx =  snapshot.getValue().toString(); //gets the specific data when it is changed
 
             }
@@ -144,10 +196,13 @@ public class CardViewActivity extends AppCompatActivity {
 
     //remove final from results
     private ArrayList<DataObject> getDataSet() {
+
+
+        DatabaseReference deletingReference = database.getReference().child("users").child(mUserId).child("items");
         ArrayList results = new ArrayList<DataObject>();
         DataObject objz = new DataObject("First Primary ",
                 "First Secondary ");
-        for (int index = 0; index < 20; index++) {
+        for (int index = 0; index < 5; index++) {
 
             DataObject obj = new DataObject(xx +" " + index,
                     "Secondary " + index);
@@ -169,6 +224,11 @@ public class CardViewActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+    }
+
+    public ArrayList<DataObject> populatingTheCards(){
+
+        return getDataSet();
     }
 
 }
